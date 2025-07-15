@@ -30,7 +30,7 @@ jobs:
           - 5432:5432
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
@@ -38,7 +38,7 @@ jobs:
         components: rustfmt, clippy
     
     - name: Cache dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/bin/
@@ -84,7 +84,7 @@ jobs:
           - 5432:5432
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
@@ -98,7 +98,7 @@ jobs:
         TEST_DATABASE_URL: postgres://postgres:password@localhost/stellar_monitor_test
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         files: codecov.json
         fail_ci_if_error: true
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
@@ -117,7 +117,7 @@ jobs:
       run: cargo build --release
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: stellar-monitor-tenant
         path: target/release/stellar-monitor-tenant
