@@ -255,16 +255,51 @@ cargo llvm-cov
 
 ### Code Quality
 
+#### Pre-commit Hooks
+
+This project includes Git hooks to ensure code quality before commits. Install them by running:
+
+```bash
+make install-hooks
+# or
+./scripts/install-hooks.sh
+```
+
+The hooks will automatically:
+- Check code formatting with `cargo fmt`
+- Run the Clippy linter
+- Execute tests
+- Verify file sizes
+- Check for SQLx query changes
+
+To skip hooks temporarily (not recommended):
+```bash
+git commit --no-verify
+```
+
+#### Manual Code Quality Checks
+
 Format code:
 
 ```bash
 cargo fmt
+# or
+make fmt
 ```
 
 Run linter:
 
 ```bash
-cargo clippy
+cargo clippy -- -D warnings
+# or
+make clippy
+```
+
+Run all checks:
+
+```bash
+make check  # Runs fmt and clippy
+make all    # Runs check, test, and build
 ```
 
 ## Deployment
