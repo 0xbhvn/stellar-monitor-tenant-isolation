@@ -99,3 +99,128 @@ impl TenantRole {
 		true // All roles can read
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use chrono::Utc;
+
+	#[test]
+	fn test_tenant_role_permissions() {
+		// Test Owner permissions
+		assert!(TenantRole::Owner.can_manage_tenant());
+		assert!(TenantRole::Owner.can_write());
+		assert!(TenantRole::Owner.can_read());
+
+		// Test Admin permissions
+		assert!(TenantRole::Admin.can_manage_tenant());
+		assert!(TenantRole::Admin.can_write());
+		assert!(TenantRole::Admin.can_read());
+
+		// Test Member permissions
+		assert!(!TenantRole::Member.can_manage_tenant());
+		assert!(TenantRole::Member.can_write());
+		assert!(TenantRole::Member.can_read());
+
+		// Test Viewer permissions
+		assert!(!TenantRole::Viewer.can_manage_tenant());
+		assert!(!TenantRole::Viewer.can_write());
+		assert!(TenantRole::Viewer.can_read());
+	}
+
+	#[test]
+	fn test_tenant_resource_quotas() {
+		let tenant = Tenant {
+			id: Uuid::new_v4(),
+			name: "Test Corp".to_string(),
+			slug: "test-corp".to_string(),
+			is_active: true,
+			max_monitors: 20,
+			max_networks: 10,
+			max_triggers_per_monitor: 5,
+			max_rpc_requests_per_minute: 1000,
+			max_storage_mb: 5000,
+			created_at: Some(Utc::now()),
+			updated_at: Some(Utc::now()),
+		};
+
+		let quotas = tenant.resource_quotas();
+		assert_eq!(quotas.max_monitors, 20);
+		assert_eq!(quotas.max_networks, 10);
+		assert_eq!(quotas.max_triggers_per_monitor, 5);
+		assert_eq!(quotas.max_rpc_requests_per_minute, 1000);
+		assert_eq!(quotas.max_storage_mb, 5000);
+	}
+
+	#[test]
+	fn test_tenant_role_serialization() {
+		// Test serialization
+		let owner = serde_json::to_string(&TenantRole::Owner).unwrap();
+		let admin = serde_json::to_string(&TenantRole::Admin).unwrap();
+		let member = serde_json::to_string(&TenantRole::Member).unwrap();
+		let viewer = serde_json::to_string(&TenantRole::Viewer).unwrap();
+
+		assert_eq!(owner, "\"owner\"");
+		assert_eq!(admin, "\"admin\"");
+		assert_eq!(member, "\"member\"");
+		assert_eq!(viewer, "\"viewer\"");
+
+		// Test deserialization
+		let role: TenantRole = serde_json::from_str("\"owner\"").unwrap();
+		assert!(matches!(role, TenantRole::Owner));
+
+		let role: TenantRole = serde_json::from_str("\"viewer\"").unwrap();
+		assert!(matches!(role, TenantRole::Viewer));
+	}
+
+	#[test]
+	fn test_create_tenant_request() {
+		let request = CreateTenantRequest {
+			name: "New Tenant".to_string(),
+			slug: "new-tenant".to_string(),
+			max_monitors: Some(15),
+			max_networks: None,
+			max_triggers_per_monitor: Some(10),
+			max_rpc_requests_per_minute: None,
+			max_storage_mb: Some(2000),
+		};
+
+		assert_eq!(request.name, "New Tenant");
+		assert_eq!(request.slug, "new-tenant");
+		assert_eq!(request.max_monitors, Some(15));
+		assert_eq!(request.max_networks, None);
+	}
+
+	#[test]
+	fn test_update_tenant_request() {
+		let request = UpdateTenantRequest {
+			name: Some("Updated Name".to_string()),
+			is_active: Some(false),
+			max_monitors: None,
+			max_networks: Some(20),
+			max_triggers_per_monitor: None,
+			max_rpc_requests_per_minute: None,
+			max_storage_mb: None,
+		};
+
+		assert_eq!(request.name, Some("Updated Name".to_string()));
+		assert_eq!(request.is_active, Some(false));
+		assert_eq!(request.max_networks, Some(20));
+	}
+
+	#[test]
+	fn test_tenant_membership() {
+		let membership = TenantMembership {
+			id: Uuid::new_v4(),
+			tenant_id: Uuid::new_v4(),
+			user_id: Uuid::new_v4(),
+			role: TenantRole::Member,
+			created_at: Some(Utc::now()),
+			updated_at: Some(Utc::now()),
+		};
+
+		assert!(matches!(membership.role, TenantRole::Member));
+		assert!(membership.created_at.is_some());
+		assert!(membership.updated_at.is_some());
+	}
+}
