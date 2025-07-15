@@ -30,6 +30,15 @@ repos:
         language: system
         types: [rust]
         
+      - id: test-coverage
+        name: test coverage check
+        entry: bash
+        args: [-c, 'MIN_COVERAGE=95; if command -v cargo-llvm-cov &> /dev/null; then coverage=$(cargo llvm-cov --all-features --summary-only 2>/dev/null | grep TOTAL | awk "{print \$10}" | sed "s/%//"); if [ "${coverage%%.*}" -lt $MIN_COVERAGE ]; then echo "❌ Test coverage is ${coverage}%, minimum required is ${MIN_COVERAGE}%"; echo "📖 See docs/TESTING_GUIDE.md for comprehensive testing standards"; exit 1; else echo "✅ Test coverage is ${coverage}% (minimum: ${MIN_COVERAGE}%)"; fi; else echo "⚠️  cargo-llvm-cov not installed, skipping coverage check"; fi']
+        pass_filenames: false
+        language: system
+        types: [rust]
+        stages: [pre-push]
+        
       - id: sqlx-prepare-check
         name: SQLx prepare check
         entry: bash

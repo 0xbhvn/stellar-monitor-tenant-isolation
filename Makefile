@@ -1,4 +1,4 @@
-.PHONY: help install-hooks check fmt clippy test build clean prepare-sqlx all
+.PHONY: help install-hooks check fmt clippy test test-coverage build clean prepare-sqlx all
 
 # Default target
 all: check test build
@@ -10,6 +10,7 @@ help:
 	@echo "  make fmt           - Format code with cargo fmt"
 	@echo "  make clippy        - Run clippy linter"
 	@echo "  make test          - Run tests"
+	@echo "  make test-coverage - Run tests with coverage report (requires cargo-llvm-cov)"
 	@echo "  make build         - Build release binary"
 	@echo "  make clean         - Clean build artifacts"
 	@echo "  make prepare-sqlx  - Update SQLx offline query cache"
@@ -36,6 +37,26 @@ test:
 	@echo "Running tests..."
 	@cargo test
 	@echo "✅ Tests passed"
+
+test-coverage:
+	@echo "Running test coverage..."
+	@if command -v cargo-llvm-cov >/dev/null 2>&1; then \
+		cargo llvm-cov --all-features --html; \
+		coverage=$$(cargo llvm-cov --all-features --summary-only 2>/dev/null | grep TOTAL | awk '{print $$10}' | sed 's/%//'); \
+		echo "📊 Test coverage: $$coverage%"; \
+		if [ "$${coverage%%.*}" -lt 95 ]; then \
+			echo "❌ Coverage is below 95% threshold"; \
+			echo "📈 Target: 95%+ coverage following OpenZeppelin Monitor standards"; \
+			exit 1; \
+		else \
+			echo "✅ Coverage meets 95% threshold"; \
+		fi; \
+		echo "📂 Detailed report: target/llvm-cov/html/index.html"; \
+	else \
+		echo "❌ cargo-llvm-cov not installed"; \
+		echo "   Install with: cargo install cargo-llvm-cov"; \
+		exit 1; \
+	fi
 
 build:
 	@echo "Building release binary..."
