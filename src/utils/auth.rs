@@ -47,8 +47,23 @@ impl AuthService {
 	}
 
 	pub fn generate_jwt(&self, user: &User) -> Result<String, jsonwebtoken::errors::Error> {
+		self.generate_jwt_with_expiry(user, Duration::hours(1)) // 1 hour for access token
+	}
+
+	pub fn generate_refresh_token(
+		&self,
+		user: &User,
+	) -> Result<String, jsonwebtoken::errors::Error> {
+		self.generate_jwt_with_expiry(user, Duration::days(30)) // 30 days for refresh token
+	}
+
+	fn generate_jwt_with_expiry(
+		&self,
+		user: &User,
+		expiry_duration: Duration,
+	) -> Result<String, jsonwebtoken::errors::Error> {
 		let now = Utc::now();
-		let expiration = now + Duration::hours(24);
+		let expiration = now + expiry_duration;
 
 		let claims = Claims {
 			sub: user.id,

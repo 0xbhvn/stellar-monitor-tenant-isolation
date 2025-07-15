@@ -124,8 +124,8 @@ where
 		.map_err(|_| ApiError::Internal)?;
 	let refresh_token = state
 		.auth_service
-		.generate_jwt(&user)
-		.map_err(|_| ApiError::Internal)?; // TODO: Different expiry
+		.generate_refresh_token(&user)
+		.map_err(|_| ApiError::Internal)?;
 
 	Ok((
 		StatusCode::CREATED,
@@ -217,8 +217,8 @@ where
 		.map_err(|_| ApiError::Internal)?;
 	let refresh_token = state
 		.auth_service
-		.generate_jwt(&user)
-		.map_err(|_| ApiError::Internal)?; // TODO: Different expiry
+		.generate_refresh_token(&user)
+		.map_err(|_| ApiError::Internal)?;
 
 	Ok(Json(ApiResponse {
 		data: LoginResponse {
