@@ -1,9 +1,10 @@
 use axum::{
-	extract::{Path, Query, State},
-	http::StatusCode,
+	extract::{ConnectInfo, Path, Query, State},
+	http::{HeaderMap, StatusCode},
 	response::IntoResponse,
 	Json,
 };
+use std::net::SocketAddr;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -48,6 +49,8 @@ pub struct ErrorResponse {
 // Monitor handlers
 pub async fn create_monitor<M, N, T, TR, A>(
 	State(state): State<super::routes::AppState<M, N, T, TR, A>>,
+	ConnectInfo(addr): ConnectInfo<SocketAddr>,
+	headers: HeaderMap,
 	Json(request): Json<CreateMonitorRequest>,
 ) -> Result<impl IntoResponse, ApiError>
 where
@@ -57,7 +60,17 @@ where
 	TR: TenantRepositoryTrait,
 	A: AuditServiceTrait,
 {
-	let monitor = state.monitor_service.create_monitor(request).await?;
+	// Extract request metadata
+	let user_agent = headers
+		.get("user-agent")
+		.and_then(|h| h.to_str().ok())
+		.map(|s| s.to_string());
+	
+	let metadata = RequestMetadata::new()
+		.with_ip(Some(addr.ip()))
+		.with_user_agent(user_agent);
+	
+	let monitor = state.monitor_service.create_monitor(request, metadata).await?;
 	Ok((
 		StatusCode::CREATED,
 		Json(ApiResponse {
@@ -87,6 +100,8 @@ where
 
 pub async fn update_monitor<M, N, T, TR, A>(
 	State(state): State<super::routes::AppState<M, N, T, TR, A>>,
+	ConnectInfo(addr): ConnectInfo<SocketAddr>,
+	headers: HeaderMap,
 	Path(monitor_id): Path<String>,
 	Json(request): Json<UpdateMonitorRequest>,
 ) -> Result<impl IntoResponse, ApiError>
@@ -97,9 +112,19 @@ where
 	TR: TenantRepositoryTrait,
 	A: AuditServiceTrait,
 {
+	// Extract request metadata
+	let user_agent = headers
+		.get("user-agent")
+		.and_then(|h| h.to_str().ok())
+		.map(|s| s.to_string());
+	
+	let metadata = RequestMetadata::new()
+		.with_ip(Some(addr.ip()))
+		.with_user_agent(user_agent);
+	
 	let monitor = state
 		.monitor_service
-		.update_monitor(&monitor_id, request)
+		.update_monitor(&monitor_id, request, metadata)
 		.await?;
 	Ok(Json(ApiResponse {
 		data: monitor,
@@ -109,6 +134,8 @@ where
 
 pub async fn delete_monitor<M, N, T, TR, A>(
 	State(state): State<super::routes::AppState<M, N, T, TR, A>>,
+	ConnectInfo(addr): ConnectInfo<SocketAddr>,
+	headers: HeaderMap,
 	Path(monitor_id): Path<String>,
 ) -> Result<impl IntoResponse, ApiError>
 where
@@ -118,7 +145,17 @@ where
 	TR: TenantRepositoryTrait,
 	A: AuditServiceTrait,
 {
-	state.monitor_service.delete_monitor(&monitor_id).await?;
+	// Extract request metadata
+	let user_agent = headers
+		.get("user-agent")
+		.and_then(|h| h.to_str().ok())
+		.map(|s| s.to_string());
+	
+	let metadata = RequestMetadata::new()
+		.with_ip(Some(addr.ip()))
+		.with_user_agent(user_agent);
+	
+	state.monitor_service.delete_monitor(&monitor_id, metadata).await?;
 	Ok(StatusCode::NO_CONTENT)
 }
 
@@ -152,6 +189,8 @@ where
 // Network handlers
 pub async fn create_network<M, N, T, TR, A>(
 	State(state): State<super::routes::AppState<M, N, T, TR, A>>,
+	ConnectInfo(addr): ConnectInfo<SocketAddr>,
+	headers: HeaderMap,
 	Json(request): Json<CreateNetworkRequest>,
 ) -> Result<impl IntoResponse, ApiError>
 where
@@ -161,7 +200,17 @@ where
 	TR: TenantRepositoryTrait,
 	A: AuditServiceTrait,
 {
-	let network = state.network_service.create_network(request).await?;
+	// Extract request metadata
+	let user_agent = headers
+		.get("user-agent")
+		.and_then(|h| h.to_str().ok())
+		.map(|s| s.to_string());
+	
+	let metadata = RequestMetadata::new()
+		.with_ip(Some(addr.ip()))
+		.with_user_agent(user_agent);
+	
+	let network = state.network_service.create_network(request, metadata).await?;
 	Ok((
 		StatusCode::CREATED,
 		Json(ApiResponse {
@@ -191,6 +240,8 @@ where
 
 pub async fn update_network<M, N, T, TR, A>(
 	State(state): State<super::routes::AppState<M, N, T, TR, A>>,
+	ConnectInfo(addr): ConnectInfo<SocketAddr>,
+	headers: HeaderMap,
 	Path(network_id): Path<String>,
 	Json(request): Json<UpdateNetworkRequest>,
 ) -> Result<impl IntoResponse, ApiError>
@@ -201,9 +252,19 @@ where
 	TR: TenantRepositoryTrait,
 	A: AuditServiceTrait,
 {
+	// Extract request metadata
+	let user_agent = headers
+		.get("user-agent")
+		.and_then(|h| h.to_str().ok())
+		.map(|s| s.to_string());
+	
+	let metadata = RequestMetadata::new()
+		.with_ip(Some(addr.ip()))
+		.with_user_agent(user_agent);
+	
 	let network = state
 		.network_service
-		.update_network(&network_id, request)
+		.update_network(&network_id, request, metadata)
 		.await?;
 	Ok(Json(ApiResponse {
 		data: network,
@@ -213,6 +274,8 @@ where
 
 pub async fn delete_network<M, N, T, TR, A>(
 	State(state): State<super::routes::AppState<M, N, T, TR, A>>,
+	ConnectInfo(addr): ConnectInfo<SocketAddr>,
+	headers: HeaderMap,
 	Path(network_id): Path<String>,
 ) -> Result<impl IntoResponse, ApiError>
 where
@@ -222,7 +285,17 @@ where
 	TR: TenantRepositoryTrait,
 	A: AuditServiceTrait,
 {
-	state.network_service.delete_network(&network_id).await?;
+	// Extract request metadata
+	let user_agent = headers
+		.get("user-agent")
+		.and_then(|h| h.to_str().ok())
+		.map(|s| s.to_string());
+	
+	let metadata = RequestMetadata::new()
+		.with_ip(Some(addr.ip()))
+		.with_user_agent(user_agent);
+	
+	state.network_service.delete_network(&network_id, metadata).await?;
 	Ok(StatusCode::NO_CONTENT)
 }
 
@@ -256,6 +329,8 @@ where
 // Trigger handlers
 pub async fn create_trigger<M, N, T, TR, A>(
 	State(state): State<super::routes::AppState<M, N, T, TR, A>>,
+	ConnectInfo(addr): ConnectInfo<SocketAddr>,
+	headers: HeaderMap,
 	Json(request): Json<CreateTriggerRequest>,
 ) -> Result<impl IntoResponse, ApiError>
 where
@@ -265,7 +340,17 @@ where
 	TR: TenantRepositoryTrait,
 	A: AuditServiceTrait,
 {
-	let trigger = state.trigger_service.create_trigger(request).await?;
+	// Extract request metadata
+	let user_agent = headers
+		.get("user-agent")
+		.and_then(|h| h.to_str().ok())
+		.map(|s| s.to_string());
+	
+	let metadata = RequestMetadata::new()
+		.with_ip(Some(addr.ip()))
+		.with_user_agent(user_agent);
+	
+	let trigger = state.trigger_service.create_trigger(request, metadata).await?;
 	Ok((
 		StatusCode::CREATED,
 		Json(ApiResponse {
@@ -295,6 +380,8 @@ where
 
 pub async fn update_trigger<M, N, T, TR, A>(
 	State(state): State<super::routes::AppState<M, N, T, TR, A>>,
+	ConnectInfo(addr): ConnectInfo<SocketAddr>,
+	headers: HeaderMap,
 	Path(trigger_id): Path<String>,
 	Json(request): Json<UpdateTriggerRequest>,
 ) -> Result<impl IntoResponse, ApiError>
@@ -305,9 +392,19 @@ where
 	TR: TenantRepositoryTrait,
 	A: AuditServiceTrait,
 {
+	// Extract request metadata
+	let user_agent = headers
+		.get("user-agent")
+		.and_then(|h| h.to_str().ok())
+		.map(|s| s.to_string());
+	
+	let metadata = RequestMetadata::new()
+		.with_ip(Some(addr.ip()))
+		.with_user_agent(user_agent);
+	
 	let trigger = state
 		.trigger_service
-		.update_trigger(&trigger_id, request)
+		.update_trigger(&trigger_id, request, metadata)
 		.await?;
 	Ok(Json(ApiResponse {
 		data: trigger,
@@ -317,6 +414,8 @@ where
 
 pub async fn delete_trigger<M, N, T, TR, A>(
 	State(state): State<super::routes::AppState<M, N, T, TR, A>>,
+	ConnectInfo(addr): ConnectInfo<SocketAddr>,
+	headers: HeaderMap,
 	Path(trigger_id): Path<String>,
 ) -> Result<impl IntoResponse, ApiError>
 where
@@ -326,7 +425,17 @@ where
 	TR: TenantRepositoryTrait,
 	A: AuditServiceTrait,
 {
-	state.trigger_service.delete_trigger(&trigger_id).await?;
+	// Extract request metadata
+	let user_agent = headers
+		.get("user-agent")
+		.and_then(|h| h.to_str().ok())
+		.map(|s| s.to_string());
+	
+	let metadata = RequestMetadata::new()
+		.with_ip(Some(addr.ip()))
+		.with_user_agent(user_agent);
+	
+	state.trigger_service.delete_trigger(&trigger_id, metadata).await?;
 	Ok(StatusCode::NO_CONTENT)
 }
 
@@ -345,11 +454,12 @@ where
 	let offset = pagination.offset.unwrap_or(0);
 
 	let triggers = state.trigger_service.list_triggers(limit, offset).await?;
+	let total = state.trigger_service.get_trigger_count().await?;
 
 	Ok(Json(ApiResponse {
 		data: triggers,
 		meta: Some(MetaData {
-			total: None, // TODO: Add count method
+			total: Some(total),
 			limit,
 			offset,
 		}),
