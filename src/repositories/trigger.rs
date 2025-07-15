@@ -31,6 +31,7 @@ pub trait TenantTriggerRepositoryTrait: Clone + Send + Sync {
 		limit: i64,
 		offset: i64,
 	) -> Result<Vec<TenantTrigger>, TenantRepositoryError>;
+	async fn count(&self) -> Result<i64, TenantRepositoryError>;
 
 	// Check if we can create more triggers for a monitor
 	async fn check_quota(&self, monitor_id: Uuid) -> Result<bool, TenantRepositoryError>;
@@ -287,6 +288,23 @@ impl TenantTriggerRepositoryTrait for TenantTriggerRepository {
 		.await?;
 
 		Ok(triggers)
+	}
+
+	async fn count(&self) -> Result<i64, TenantRepositoryError> {
+		let tenant_id = current_tenant_id();
+
+		let count = sqlx::query_scalar!(
+			r#"
+			SELECT COUNT(*) as "count!"
+			FROM tenant_triggers 
+			WHERE tenant_id = $1
+			"#,
+			tenant_id
+		)
+		.fetch_one(&self.pool)
+		.await?;
+
+		Ok(count)
 	}
 
 	async fn check_quota(&self, monitor_id: Uuid) -> Result<bool, TenantRepositoryError> {
