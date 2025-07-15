@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\t\tSELECT COUNT(*) as \"count!\"\n\t\t\tFROM tenant_triggers \n\t\t\tWHERE tenant_id = $1\n\t\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0dfc72dbb4e7a28b713dd06bf2213cf9134549b37410da8aa18150f33199536c"
+}
