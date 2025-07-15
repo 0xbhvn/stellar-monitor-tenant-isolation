@@ -307,7 +307,7 @@ where
 				),
 				permissions: request.permissions.clone(),
 				expires_at: request.expires_at,
-				created_at: stored_key.created_at.unwrap_or_else(|| chrono::Utc::now()),
+				created_at: stored_key.created_at.unwrap_or_else(chrono::Utc::now),
 			},
 			meta: None,
 		}),

@@ -131,7 +131,7 @@ where
 				resource_type: Some(AuditResourceType::Trigger),
 				resource_id: Some(trigger.id),
 				changes: Some(serde_json::to_value(&request).unwrap_or(JsonValue::Null)),
-				ip_address: metadata.ip_address.clone(),
+				ip_address: metadata.ip_address,
 				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
@@ -177,7 +177,7 @@ where
 				resource_type: Some(AuditResourceType::Trigger),
 				resource_id: Some(existing.id),
 				changes: Some(serde_json::to_value(&request).unwrap_or(JsonValue::Null)),
-				ip_address: metadata.ip_address.clone(),
+				ip_address: metadata.ip_address,
 				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
@@ -215,7 +215,7 @@ where
 				resource_type: Some(AuditResourceType::Trigger),
 				resource_id: Some(trigger.id),
 				changes: None,
-				ip_address: metadata.ip_address.clone(),
+				ip_address: metadata.ip_address,
 				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;

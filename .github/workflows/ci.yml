@@ -120,8 +120,6 @@ jobs:
     
     - name: Build
       run: cargo build --release
-      env:
-        DATABASE_URL: postgres://postgres:password@localhost/stellar_monitor_test
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

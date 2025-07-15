@@ -14,7 +14,6 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::Mutex;
 
-use crate::models::Tenant;
 use crate::repositories::TenantRepositoryTrait;
 use crate::utils::{with_tenant_context, AuthService, AuthenticatedUser, TenantContext};
 
@@ -92,7 +91,7 @@ where
 	let user = AuthenticatedUser {
 		id: claims.sub,
 		email: claims.email,
-		role: membership.1.clone(),
+		role: membership.1,
 	};
 
 	Ok(TenantContext::with_user(
@@ -159,7 +158,7 @@ async fn authenticate_api_key(
 
 	// Get tenant to get quotas
 	let tenant = sqlx::query_as!(
-		Tenant,
+		crate::models::Tenant,
 		r#"
 		SELECT 
 			id, 
