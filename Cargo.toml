@@ -61,8 +61,7 @@ tower-http = { version = "0.6", features = ["cors", "trace", "limit"] }
 bigdecimal = "0.4.8"
 
 # OpenZeppelin Monitor as dependency
-# For now we'll reference it locally, but this would be a git/crates.io dependency
-# openzeppelin-monitor = { path = "../openzeppelin-monitor" }
+openzeppelin-monitor = { path = "../openzeppelin-monitor" }
 
 [dev-dependencies]
 cargo-llvm-cov = "0.6"

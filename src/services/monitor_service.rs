@@ -10,6 +10,9 @@ use crate::repositories::{
 };
 use crate::utils::current_tenant_context;
 
+// TODO: Integrate with openzeppelin_monitor types when implementing the actual monitoring logic
+// use openzeppelin_monitor::models::{Monitor as OZMonitor, Network as OZNetwork};
+
 #[async_trait]
 pub trait MonitorServiceTrait: Send + Sync {
 	async fn create_monitor(
