@@ -11,8 +11,10 @@ use crate::repositories::{
 };
 use crate::utils::current_tenant_context;
 
-// TODO: Integrate with openzeppelin_monitor types when implementing the actual monitoring logic
-// use openzeppelin_monitor::models::{Monitor as OZMonitor, Network as OZNetwork};
+// Note: The TenantMonitor type in this service stores monitor configurations with multi-tenant isolation.
+// The actual monitor execution will be handled by a separate openzeppelin-monitor instance that reads
+// configurations from the shared database, while this service handles tenant-specific concerns like
+// quotas, permissions, and audit logging.
 
 #[async_trait]
 pub trait MonitorServiceTrait: Send + Sync {
