@@ -2,7 +2,7 @@ use std::sync::Arc;
 use tokio::task_local;
 use uuid::Uuid;
 
-use crate::models::TenantRole;
+use crate::models::{TenantQuotas, TenantRole};
 
 // Task-local storage for tenant context
 task_local! {
@@ -14,6 +14,7 @@ pub struct TenantContext {
 	pub tenant_id: Uuid,
 	pub user: Option<AuthenticatedUser>,
 	pub api_key_id: Option<Uuid>,
+	pub quotas: TenantQuotas,
 }
 
 #[derive(Debug, Clone)]
@@ -24,27 +25,30 @@ pub struct AuthenticatedUser {
 }
 
 impl TenantContext {
-	pub fn new(tenant_id: Uuid) -> Self {
+	pub fn new(tenant_id: Uuid, quotas: TenantQuotas) -> Self {
 		Self {
 			tenant_id,
 			user: None,
 			api_key_id: None,
+			quotas,
 		}
 	}
 
-	pub fn with_user(tenant_id: Uuid, user: AuthenticatedUser) -> Self {
+	pub fn with_user(tenant_id: Uuid, user: AuthenticatedUser, quotas: TenantQuotas) -> Self {
 		Self {
 			tenant_id,
 			user: Some(user),
 			api_key_id: None,
+			quotas,
 		}
 	}
 
-	pub fn with_api_key(tenant_id: Uuid, api_key_id: Uuid) -> Self {
+	pub fn with_api_key(tenant_id: Uuid, api_key_id: Uuid, quotas: TenantQuotas) -> Self {
 		Self {
 			tenant_id,
 			user: None,
 			api_key_id: Some(api_key_id),
+			quotas,
 		}
 	}
 
@@ -77,6 +81,11 @@ pub fn current_tenant_context() -> Arc<TenantContext> {
 	TENANT_CONTEXT
 		.try_with(|ctx| ctx.clone())
 		.expect("No tenant context set")
+}
+
+// Get the current tenant context as an Option
+pub fn current_tenant_context_option() -> Option<Arc<TenantContext>> {
+	TENANT_CONTEXT.try_with(|ctx| ctx.clone()).ok()
 }
 
 // Get the current tenant ID
@@ -118,8 +127,9 @@ pub mod middleware {
 		// TODO: Look up tenant by slug
 		// TODO: Verify user has access to tenant
 
-		// For now, create a dummy context
-		let context = TenantContext::new(Uuid::new_v4());
+		// For now, create a dummy context with default quotas
+		let default_quotas = TenantQuotas::default();
+		let context = TenantContext::new(Uuid::new_v4(), default_quotas);
 
 		// Store context in request extensions
 		req.extensions_mut().insert(Arc::new(context.clone()));

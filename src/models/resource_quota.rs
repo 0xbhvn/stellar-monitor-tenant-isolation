@@ -34,13 +34,22 @@ pub struct ResourceQuotaStatus {
 	pub available: AvailableResources,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct TenantQuotas {
 	pub max_monitors: i32,
 	pub max_networks: i32,
 	pub max_triggers_per_monitor: i32,
 	pub max_rpc_requests_per_minute: i32,
 	pub max_storage_mb: i32,
+	pub api_rate_limits: ApiRateLimits,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct ApiRateLimits {
+	pub requests_per_minute_user: u32,
+	pub burst_size_user: u32,
+	pub requests_per_minute_api_key: u32,
+	pub burst_size_api_key: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

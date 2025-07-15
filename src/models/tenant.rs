@@ -2,6 +2,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use super::resource_quota::{ApiRateLimits, TenantQuotas};
+
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Tenant {
 	pub id: Uuid,
@@ -17,6 +19,19 @@ pub struct Tenant {
 	// Metadata
 	pub created_at: Option<DateTime<Utc>>,
 	pub updated_at: Option<DateTime<Utc>>,
+}
+
+impl Tenant {
+	pub fn resource_quotas(&self) -> TenantQuotas {
+		TenantQuotas {
+			max_monitors: self.max_monitors,
+			max_networks: self.max_networks,
+			max_triggers_per_monitor: self.max_triggers_per_monitor,
+			max_rpc_requests_per_minute: self.max_rpc_requests_per_minute,
+			max_storage_mb: self.max_storage_mb,
+			api_rate_limits: ApiRateLimits::default(),
+		}
+	}
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
