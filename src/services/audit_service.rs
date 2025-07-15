@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use sqlx::types::ipnetwork::IpNetwork;
 use sqlx::{Pool, Postgres};
+use std::sync::Arc;
 
 use super::monitor_service::{AuditServiceTrait, ServiceError};
 use crate::models::audit::ResourceType;
@@ -149,5 +150,12 @@ impl AuditService {
 		})?;
 
 		Ok(logs)
+	}
+}
+
+#[async_trait]
+impl<T: AuditServiceTrait> AuditServiceTrait for Arc<T> {
+	async fn log(&self, request: CreateAuditLogRequest) -> Result<(), ServiceError> {
+		(**self).log(request).await
 	}
 }
