@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\tINSERT INTO api_keys (tenant_id, name, key_hash, permissions, expires_at)\n\t\tVALUES ($1, $2, $3, $4, $5)\n\t\tRETURNING id, created_at\n\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Jsonb",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "a5d995da5ee917db16f1b49b50f43a68612713d779d59446011465ccad53e28e"
+}

@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\tSELECT \n\t\t\tak.id, ak.tenant_id, ak.key_hash, ak.is_active, ak.expires_at,\n\t\t\tt.slug as tenant_slug\n\t\tFROM api_keys ak\n\t\tINNER JOIN tenants t ON ak.tenant_id = t.id\n\t\tWHERE t.slug = $1 AND ak.is_active = true\n\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "tenant_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "key_hash",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "expires_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "tenant_slug",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "3e9d42a5502d3dfda027ba2915e198fb8211fef38f0aabf2509c408dd615414d"
+}

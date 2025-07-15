@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\t\tSELECT id, name, slug,\n\t\t\t       COALESCE(is_active, true) as \"is_active!\",\n\t\t\t       COALESCE(max_monitors, 10) as \"max_monitors!\",\n\t\t\t       COALESCE(max_networks, 5) as \"max_networks!\",\n\t\t\t       COALESCE(max_triggers_per_monitor, 3) as \"max_triggers_per_monitor!\",\n\t\t\t       COALESCE(max_rpc_requests_per_minute, 1000) as \"max_rpc_requests_per_minute!\",\n\t\t\t       COALESCE(max_storage_mb, 1000) as \"max_storage_mb!\",\n\t\t\t       created_at, updated_at\n\t\t\tFROM tenants \n\t\t\tWHERE id = $1\n\t\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_active!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "max_monitors!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "max_networks!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "max_triggers_per_monitor!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "max_rpc_requests_per_minute!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "max_storage_mb!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "17bc14a7a08314711032943143d79bbb2e56a9c703c44d8cc2290777bac64dd7"
+}

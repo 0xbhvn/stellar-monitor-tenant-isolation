@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM tenant_networks WHERE tenant_id = $1 AND network_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "63bd27094b7e97f1b3ade284511da3d98e762e6c0af3d16b947147b5967798ee"
+}

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\t\tSELECT COALESCE(usage_value, 0)::integer\n\t\t\tFROM resource_usage\n\t\t\tWHERE tenant_id = $1 \n\t\t\tAND resource_type = 'storage'\n\t\t\tAND usage_date = CURRENT_DATE\n\t\t\tORDER BY created_at DESC\n\t\t\tLIMIT 1\n\t\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "coalesce",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "48bec86a40dc094253da558eef6599ee5c00ac95439778347518cde4e3fe6959"
+}

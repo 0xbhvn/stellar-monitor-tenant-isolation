@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM tenant_triggers WHERE tenant_id = $1 AND trigger_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "33524f9e42375743f546f8b4ddffd3ddb65ef5e8242fa9ce6532c3e4b073bb82"
+}

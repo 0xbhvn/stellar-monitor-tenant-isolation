@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\tSELECT t.id, t.name, t.slug, tm.role\n\t\tFROM tenants t\n\t\tINNER JOIN tenant_memberships tm ON t.id = tm.tenant_id\n\t\tWHERE tm.user_id = $1 AND t.is_active = true\n\t\tORDER BY t.created_at DESC\n\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "role",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c1f13e092be09851dfeb1dd41c6e8400e6d3e71594775629f899eccfe79d619e"
+}

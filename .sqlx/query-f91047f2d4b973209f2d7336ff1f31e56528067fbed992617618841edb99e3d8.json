@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\t\tSELECT COUNT(*) \n\t\t\tFROM tenant_monitors \n\t\t\tWHERE tenant_id = $1 \n\t\t\tAND network_id = (SELECT id FROM tenant_networks WHERE tenant_id = $1 AND network_id = $2)\n\t\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f91047f2d4b973209f2d7336ff1f31e56528067fbed992617618841edb99e3d8"
+}

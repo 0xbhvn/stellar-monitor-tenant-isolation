@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\t\tSELECT t.*, tm.role\n\t\t\tFROM tenants t\n\t\t\tINNER JOIN tenant_memberships tm ON t.id = tm.tenant_id\n\t\t\tWHERE tm.user_id = $1 AND t.is_active = true\n\t\t\tORDER BY t.created_at DESC\n\t\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "max_monitors",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "max_networks",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "max_triggers_per_monitor",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "max_rpc_requests_per_minute",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "max_storage_mb",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "role",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "ce8c5a73c20413e87616655414d35ae0a21b9d0a306cc555be6b98f516872733"
+}

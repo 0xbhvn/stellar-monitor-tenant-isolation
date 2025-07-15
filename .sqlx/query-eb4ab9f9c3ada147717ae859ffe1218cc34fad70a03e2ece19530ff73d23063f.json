@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\t\tUPDATE tenant_triggers\n\t\t\tSET \n\t\t\t\tname = COALESCE($3, name),\n\t\t\t\tconfiguration = COALESCE($4, configuration),\n\t\t\t\tis_active = COALESCE($5, is_active),\n\t\t\t\tupdated_at = NOW()\n\t\t\tWHERE tenant_id = $1 AND trigger_id = $2\n\t\t\tRETURNING id, tenant_id, trigger_id, monitor_id, name, type as trigger_type, configuration, is_active, created_at, updated_at\n\t\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "tenant_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "trigger_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "monitor_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "trigger_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "configuration",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Varchar",
+        "Jsonb",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "eb4ab9f9c3ada147717ae859ffe1218cc34fad70a03e2ece19530ff73d23063f"
+}

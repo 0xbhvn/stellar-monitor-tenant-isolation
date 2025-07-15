@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n\t\t\tSELECT COALESCE(SUM(usage_value), 0)::integer\n\t\t\tFROM resource_usage\n\t\t\tWHERE tenant_id = $1 \n\t\t\tAND resource_type = 'rpc_requests'\n\t\t\tAND created_at >= NOW() - INTERVAL '1 minute'\n\t\t\t",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "coalesce",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8bfa4be6229dda0c774bb876d583baed86e56ad5ef9b0292f524a8a0d8b22318"
+}
