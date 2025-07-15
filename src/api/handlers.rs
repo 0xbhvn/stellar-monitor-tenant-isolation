@@ -4,8 +4,8 @@ use axum::{
 	response::IntoResponse,
 	Json,
 };
-use std::net::SocketAddr;
 use serde::{Deserialize, Serialize};
+use std::net::SocketAddr;
 use uuid::Uuid;
 
 use crate::models::*;
@@ -65,12 +65,15 @@ where
 		.get("user-agent")
 		.and_then(|h| h.to_str().ok())
 		.map(|s| s.to_string());
-	
+
 	let metadata = RequestMetadata::new()
 		.with_ip(Some(addr.ip()))
 		.with_user_agent(user_agent);
-	
-	let monitor = state.monitor_service.create_monitor(request, metadata).await?;
+
+	let monitor = state
+		.monitor_service
+		.create_monitor(request, metadata)
+		.await?;
 	Ok((
 		StatusCode::CREATED,
 		Json(ApiResponse {
@@ -117,11 +120,11 @@ where
 		.get("user-agent")
 		.and_then(|h| h.to_str().ok())
 		.map(|s| s.to_string());
-	
+
 	let metadata = RequestMetadata::new()
 		.with_ip(Some(addr.ip()))
 		.with_user_agent(user_agent);
-	
+
 	let monitor = state
 		.monitor_service
 		.update_monitor(&monitor_id, request, metadata)
@@ -150,12 +153,15 @@ where
 		.get("user-agent")
 		.and_then(|h| h.to_str().ok())
 		.map(|s| s.to_string());
-	
+
 	let metadata = RequestMetadata::new()
 		.with_ip(Some(addr.ip()))
 		.with_user_agent(user_agent);
-	
-	state.monitor_service.delete_monitor(&monitor_id, metadata).await?;
+
+	state
+		.monitor_service
+		.delete_monitor(&monitor_id, metadata)
+		.await?;
 	Ok(StatusCode::NO_CONTENT)
 }
 
@@ -205,12 +211,15 @@ where
 		.get("user-agent")
 		.and_then(|h| h.to_str().ok())
 		.map(|s| s.to_string());
-	
+
 	let metadata = RequestMetadata::new()
 		.with_ip(Some(addr.ip()))
 		.with_user_agent(user_agent);
-	
-	let network = state.network_service.create_network(request, metadata).await?;
+
+	let network = state
+		.network_service
+		.create_network(request, metadata)
+		.await?;
 	Ok((
 		StatusCode::CREATED,
 		Json(ApiResponse {
@@ -257,11 +266,11 @@ where
 		.get("user-agent")
 		.and_then(|h| h.to_str().ok())
 		.map(|s| s.to_string());
-	
+
 	let metadata = RequestMetadata::new()
 		.with_ip(Some(addr.ip()))
 		.with_user_agent(user_agent);
-	
+
 	let network = state
 		.network_service
 		.update_network(&network_id, request, metadata)
@@ -290,12 +299,15 @@ where
 		.get("user-agent")
 		.and_then(|h| h.to_str().ok())
 		.map(|s| s.to_string());
-	
+
 	let metadata = RequestMetadata::new()
 		.with_ip(Some(addr.ip()))
 		.with_user_agent(user_agent);
-	
-	state.network_service.delete_network(&network_id, metadata).await?;
+
+	state
+		.network_service
+		.delete_network(&network_id, metadata)
+		.await?;
 	Ok(StatusCode::NO_CONTENT)
 }
 
@@ -345,12 +357,15 @@ where
 		.get("user-agent")
 		.and_then(|h| h.to_str().ok())
 		.map(|s| s.to_string());
-	
+
 	let metadata = RequestMetadata::new()
 		.with_ip(Some(addr.ip()))
 		.with_user_agent(user_agent);
-	
-	let trigger = state.trigger_service.create_trigger(request, metadata).await?;
+
+	let trigger = state
+		.trigger_service
+		.create_trigger(request, metadata)
+		.await?;
 	Ok((
 		StatusCode::CREATED,
 		Json(ApiResponse {
@@ -397,11 +412,11 @@ where
 		.get("user-agent")
 		.and_then(|h| h.to_str().ok())
 		.map(|s| s.to_string());
-	
+
 	let metadata = RequestMetadata::new()
 		.with_ip(Some(addr.ip()))
 		.with_user_agent(user_agent);
-	
+
 	let trigger = state
 		.trigger_service
 		.update_trigger(&trigger_id, request, metadata)
@@ -430,12 +445,15 @@ where
 		.get("user-agent")
 		.and_then(|h| h.to_str().ok())
 		.map(|s| s.to_string());
-	
+
 	let metadata = RequestMetadata::new()
 		.with_ip(Some(addr.ip()))
 		.with_user_agent(user_agent);
-	
-	state.trigger_service.delete_trigger(&trigger_id, metadata).await?;
+
+	state
+		.trigger_service
+		.delete_trigger(&trigger_id, metadata)
+		.await?;
 	Ok(StatusCode::NO_CONTENT)
 }
 

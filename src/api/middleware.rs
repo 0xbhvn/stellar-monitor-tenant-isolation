@@ -9,10 +9,10 @@ use axum_extra::{
 	headers::{authorization::Bearer, Authorization},
 };
 use sqlx::{Pool, Postgres};
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::Mutex;
-use std::collections::HashMap;
 
 use crate::models::Tenant;
 use crate::repositories::TenantRepositoryTrait;
@@ -40,7 +40,13 @@ where
 		authenticate_api_key(&app_state.pool, &tenant_slug, token).await?
 	} else {
 		// Handle JWT authentication
-		authenticate_jwt(&app_state.auth_service, &app_state.tenant_repo, &tenant_slug, token).await?
+		authenticate_jwt(
+			&app_state.auth_service,
+			&app_state.tenant_repo,
+			&tenant_slug,
+			token,
+		)
+		.await?
 	};
 
 	// Store context in request extensions
@@ -89,7 +95,11 @@ where
 		role: membership.1.clone(),
 	};
 
-	Ok(TenantContext::with_user(tenant.id, user, tenant.resource_quotas()))
+	Ok(TenantContext::with_user(
+		tenant.id,
+		user,
+		tenant.resource_quotas(),
+	))
 }
 
 async fn authenticate_api_key(
@@ -200,19 +210,22 @@ pub async fn rate_limit_middleware(
 	if let Some(context) = crate::utils::current_tenant_context_option() {
 		let tenant_id = context.tenant_id.to_string();
 		let limits = &context.quotas.api_rate_limits;
-		
+
 		// Use appropriate limit based on auth type
 		let (requests_per_minute, burst_size) = if context.user.is_some() {
 			(limits.requests_per_minute_user, limits.burst_size_user)
 		} else {
-			(limits.requests_per_minute_api_key, limits.burst_size_api_key)
+			(
+				limits.requests_per_minute_api_key,
+				limits.burst_size_api_key,
+			)
 		};
-		
+
 		let window_duration = Duration::from_secs(60); // 1 minute window
 		let now = Instant::now();
-		
+
 		let mut rate_limits = RATE_LIMITS.lock().await;
-		
+
 		let should_allow = match rate_limits.get_mut(&tenant_id) {
 			Some(entry) => {
 				// Check if window has expired
@@ -242,12 +255,12 @@ pub async fn rate_limit_middleware(
 				true
 			}
 		};
-		
+
 		if !should_allow {
 			return Err(StatusCode::TOO_MANY_REQUESTS);
 		}
 	}
-	
+
 	Ok(next.run(req).await)
 }
 
