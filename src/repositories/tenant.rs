@@ -487,6 +487,7 @@ impl TenantRepositoryTrait for TenantRepository {
 			max_triggers_per_monitor: tenant.max_triggers_per_monitor,
 			max_rpc_requests_per_minute: tenant.max_rpc_requests_per_minute,
 			max_storage_mb: tenant.max_storage_mb,
+			api_rate_limits: crate::models::resource_quota::ApiRateLimits::default(),
 		};
 
 		let usage = CurrentUsage {

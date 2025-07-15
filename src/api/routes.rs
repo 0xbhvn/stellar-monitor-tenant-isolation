@@ -1,4 +1,5 @@
 use axum::{
+	middleware,
 	routing::{delete, get, post, put},
 	Router,
 };
@@ -10,6 +11,7 @@ use tower_http::{
 
 use super::auth;
 use super::handlers;
+use super::middleware as api_middleware;
 use crate::repositories::*;
 use crate::services::*;
 
@@ -72,13 +74,11 @@ where
 		// API key routes
 		.route("/api-keys", post(auth::create_api_key))
 		.route("/api-keys", get(auth::list_api_keys))
-		.route("/api-keys/:key_id", delete(auth::revoke_api_key));
-	// Apply tenant middleware
-	// TODO: Fix middleware compilation issue
-	// .layer(middleware::from_fn_with_state(
-	// 	(state.pool.clone(), state.auth_service.clone()),
-	// 	api_middleware::tenant_auth_middleware::<axum::body::Body>,
-	// ));
+		.route("/api-keys/:key_id", delete(auth::revoke_api_key))
+		.layer(middleware::from_fn_with_state(
+			state.clone(),
+			api_middleware::tenant_auth_middleware,
+		));
 
 	// Combine all routes
 	Router::new()
