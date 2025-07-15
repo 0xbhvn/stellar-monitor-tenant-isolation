@@ -5,7 +5,8 @@ use uuid::Uuid;
 use super::monitor_service::{AuditServiceTrait, ServiceError};
 use crate::models::audit::ResourceType as AuditResourceType;
 use crate::models::{
-	AuditAction, CreateAuditLogRequest, CreateTriggerRequest, TenantTrigger, UpdateTriggerRequest,
+	AuditAction, CreateAuditLogRequest, CreateTriggerRequest, RequestMetadata, TenantTrigger,
+	UpdateTriggerRequest,
 };
 use crate::repositories::{
 	TenantMonitorRepositoryTrait, TenantRepositoryTrait, TenantTriggerRepositoryTrait,
@@ -17,14 +18,20 @@ pub trait TriggerServiceTrait: Send + Sync {
 	async fn create_trigger(
 		&self,
 		request: CreateTriggerRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantTrigger, ServiceError>;
 	async fn get_trigger(&self, trigger_id: &str) -> Result<TenantTrigger, ServiceError>;
 	async fn update_trigger(
 		&self,
 		trigger_id: &str,
 		request: UpdateTriggerRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantTrigger, ServiceError>;
-	async fn delete_trigger(&self, trigger_id: &str) -> Result<(), ServiceError>;
+	async fn delete_trigger(
+		&self,
+		trigger_id: &str,
+		metadata: RequestMetadata,
+	) -> Result<(), ServiceError>;
 	async fn list_triggers(
 		&self,
 		limit: i64,
@@ -34,6 +41,7 @@ pub trait TriggerServiceTrait: Send + Sync {
 		&self,
 		monitor_id: Uuid,
 	) -> Result<Vec<TenantTrigger>, ServiceError>;
+	async fn get_trigger_count(&self) -> Result<i64, ServiceError>;
 }
 
 #[derive(Clone)]
@@ -78,6 +86,7 @@ where
 	async fn create_trigger(
 		&self,
 		request: CreateTriggerRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantTrigger, ServiceError> {
 		let context = current_tenant_context();
 
@@ -122,8 +131,8 @@ where
 				resource_type: Some(AuditResourceType::Trigger),
 				resource_id: Some(trigger.id),
 				changes: Some(serde_json::to_value(&request).unwrap_or(JsonValue::Null)),
-				ip_address: None,
-				user_agent: None,
+				ip_address: metadata.ip_address.clone(),
+				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
 
@@ -138,6 +147,7 @@ where
 		&self,
 		trigger_id: &str,
 		request: UpdateTriggerRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantTrigger, ServiceError> {
 		let context = current_tenant_context();
 
@@ -167,15 +177,19 @@ where
 				resource_type: Some(AuditResourceType::Trigger),
 				resource_id: Some(existing.id),
 				changes: Some(serde_json::to_value(&request).unwrap_or(JsonValue::Null)),
-				ip_address: None,
-				user_agent: None,
+				ip_address: metadata.ip_address.clone(),
+				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
 
 		Ok(trigger)
 	}
 
-	async fn delete_trigger(&self, trigger_id: &str) -> Result<(), ServiceError> {
+	async fn delete_trigger(
+		&self,
+		trigger_id: &str,
+		metadata: RequestMetadata,
+	) -> Result<(), ServiceError> {
 		let context = current_tenant_context();
 
 		// Check write permissions
@@ -201,8 +215,8 @@ where
 				resource_type: Some(AuditResourceType::Trigger),
 				resource_id: Some(trigger.id),
 				changes: None,
-				ip_address: None,
-				user_agent: None,
+				ip_address: metadata.ip_address.clone(),
+				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
 
@@ -225,5 +239,9 @@ where
 		let _ = self.monitor_repo.get_by_uuid(monitor_id).await?;
 
 		Ok(self.trigger_repo.get_by_monitor(monitor_id).await?)
+	}
+
+	async fn get_trigger_count(&self) -> Result<i64, ServiceError> {
+		Ok(self.trigger_repo.count().await?)
 	}
 }

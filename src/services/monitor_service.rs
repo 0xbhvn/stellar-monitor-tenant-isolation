@@ -3,7 +3,8 @@ use serde_json::Value as JsonValue;
 
 use crate::models::audit::ResourceType as AuditResourceType;
 use crate::models::{
-	AuditAction, CreateAuditLogRequest, CreateMonitorRequest, TenantMonitor, UpdateMonitorRequest,
+	AuditAction, CreateAuditLogRequest, CreateMonitorRequest, RequestMetadata, TenantMonitor,
+	UpdateMonitorRequest,
 };
 use crate::repositories::{
 	TenantMonitorRepositoryTrait, TenantRepositoryError, TenantRepositoryTrait,
@@ -18,14 +19,20 @@ pub trait MonitorServiceTrait: Send + Sync {
 	async fn create_monitor(
 		&self,
 		request: CreateMonitorRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantMonitor, ServiceError>;
 	async fn get_monitor(&self, monitor_id: &str) -> Result<TenantMonitor, ServiceError>;
 	async fn update_monitor(
 		&self,
 		monitor_id: &str,
 		request: UpdateMonitorRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantMonitor, ServiceError>;
-	async fn delete_monitor(&self, monitor_id: &str) -> Result<(), ServiceError>;
+	async fn delete_monitor(
+		&self,
+		monitor_id: &str,
+		metadata: RequestMetadata,
+	) -> Result<(), ServiceError>;
 	async fn list_monitors(
 		&self,
 		limit: i64,
@@ -71,6 +78,7 @@ where
 	async fn create_monitor(
 		&self,
 		request: CreateMonitorRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantMonitor, ServiceError> {
 		let context = current_tenant_context();
 
@@ -103,8 +111,8 @@ where
 				resource_type: Some(AuditResourceType::Monitor),
 				resource_id: Some(monitor.id),
 				changes: Some(serde_json::to_value(&request).unwrap_or(JsonValue::Null)),
-				ip_address: None, // TODO: Get from request context
-				user_agent: None, // TODO: Get from request context
+				ip_address: metadata.ip_address.clone(),
+				user_agent: metadata.user_agent.clone()
 			})
 			.await?;
 
@@ -120,6 +128,7 @@ where
 		&self,
 		monitor_id: &str,
 		request: UpdateMonitorRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantMonitor, ServiceError> {
 		let context = current_tenant_context();
 
@@ -149,15 +158,19 @@ where
 				resource_type: Some(AuditResourceType::Monitor),
 				resource_id: Some(existing.id),
 				changes: Some(serde_json::to_value(&request).unwrap_or(JsonValue::Null)),
-				ip_address: None,
-				user_agent: None,
+				ip_address: metadata.ip_address.clone(),
+				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
 
 		Ok(monitor)
 	}
 
-	async fn delete_monitor(&self, monitor_id: &str) -> Result<(), ServiceError> {
+	async fn delete_monitor(
+		&self,
+		monitor_id: &str,
+		metadata: RequestMetadata,
+	) -> Result<(), ServiceError> {
 		let context = current_tenant_context();
 
 		// Check write permissions
@@ -183,8 +196,8 @@ where
 				resource_type: Some(AuditResourceType::Monitor),
 				resource_id: Some(monitor.id),
 				changes: None,
-				ip_address: None,
-				user_agent: None,
+				ip_address: metadata.ip_address.clone(),
+				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
 

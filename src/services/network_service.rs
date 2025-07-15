@@ -4,7 +4,8 @@ use serde_json::Value as JsonValue;
 use super::monitor_service::{AuditServiceTrait, ServiceError};
 use crate::models::audit::ResourceType as AuditResourceType;
 use crate::models::{
-	AuditAction, CreateAuditLogRequest, CreateNetworkRequest, TenantNetwork, UpdateNetworkRequest,
+	AuditAction, CreateAuditLogRequest, CreateNetworkRequest, RequestMetadata, TenantNetwork,
+	UpdateNetworkRequest,
 };
 use crate::repositories::{TenantNetworkRepositoryTrait, TenantRepositoryTrait};
 use crate::utils::current_tenant_context;
@@ -14,14 +15,20 @@ pub trait NetworkServiceTrait: Send + Sync {
 	async fn create_network(
 		&self,
 		request: CreateNetworkRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantNetwork, ServiceError>;
 	async fn get_network(&self, network_id: &str) -> Result<TenantNetwork, ServiceError>;
 	async fn update_network(
 		&self,
 		network_id: &str,
 		request: UpdateNetworkRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantNetwork, ServiceError>;
-	async fn delete_network(&self, network_id: &str) -> Result<(), ServiceError>;
+	async fn delete_network(
+		&self,
+		network_id: &str,
+		metadata: RequestMetadata,
+	) -> Result<(), ServiceError>;
 	async fn list_networks(
 		&self,
 		limit: i64,
@@ -67,6 +74,7 @@ where
 	async fn create_network(
 		&self,
 		request: CreateNetworkRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantNetwork, ServiceError> {
 		let context = current_tenant_context();
 
@@ -107,8 +115,8 @@ where
 				resource_type: Some(AuditResourceType::Network),
 				resource_id: Some(network.id),
 				changes: Some(serde_json::to_value(&request).unwrap_or(JsonValue::Null)),
-				ip_address: None,
-				user_agent: None,
+				ip_address: metadata.ip_address.clone(),
+				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
 
@@ -123,6 +131,7 @@ where
 		&self,
 		network_id: &str,
 		request: UpdateNetworkRequest,
+		metadata: RequestMetadata,
 	) -> Result<TenantNetwork, ServiceError> {
 		let context = current_tenant_context();
 
@@ -152,15 +161,19 @@ where
 				resource_type: Some(AuditResourceType::Network),
 				resource_id: Some(existing.id),
 				changes: Some(serde_json::to_value(&request).unwrap_or(JsonValue::Null)),
-				ip_address: None,
-				user_agent: None,
+				ip_address: metadata.ip_address.clone(),
+				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
 
 		Ok(network)
 	}
 
-	async fn delete_network(&self, network_id: &str) -> Result<(), ServiceError> {
+	async fn delete_network(
+		&self,
+		network_id: &str,
+		metadata: RequestMetadata,
+	) -> Result<(), ServiceError> {
 		let context = current_tenant_context();
 
 		// Check write permissions
@@ -186,8 +199,8 @@ where
 				resource_type: Some(AuditResourceType::Network),
 				resource_id: Some(network.id),
 				changes: None,
-				ip_address: None,
-				user_agent: None,
+				ip_address: metadata.ip_address.clone(),
+				user_agent: metadata.user_agent.clone(),
 			})
 			.await?;
 
