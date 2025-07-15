@@ -19,6 +19,7 @@ mod tests {
 				max_triggers_per_monitor,
 				max_rpc_requests_per_minute: 1000,
 				max_storage_mb: 1000,
+				api_rate_limits: stellar_monitor_tenant_isolation::models::resource_quota::ApiRateLimits::default(),
 			};
 
 			let usage = CurrentUsage {
