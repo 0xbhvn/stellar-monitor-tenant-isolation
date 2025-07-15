@@ -2,68 +2,82 @@
 
 ## Overview
 
-This document summarizes the comprehensive test suite implementation for the Stellar Monitor Tenant Isolation system, bringing test coverage from 13.42% to an estimated ~95%+.
+This document summarizes the comprehensive test suite implementation for the Stellar Monitor Tenant Isolation system. The test suite includes 154 tests across all layers of the application, with 106 tests currently passing (68.8%) when run without database configuration.
+
+## Current Execution Status
+
+- **Total Tests**: 154
+- **Passing Tests (without DB)**: 106 (68.8%)
+- **Passing Tests (with DB)**: 109 (70.8%)
+- **Failing Tests**: 45 (29.2%)
+  - 35 API tests fail with 404 errors (routing issues)
+  - 8 integration tests fail (tenant context and database issues)
+  - 2 unit tests have assertion errors
+
+**Note**: Even with proper database setup, significant work remains to fix routing and context issues.
 
 ## Test Statistics
 
-- **Total Test Functions**: 150+
+- **Total Test Functions**: 154
 - **Test Categories**:
-  - Unit Tests: ~80
-  - API Tests: ~40
-  - Integration Tests: ~30
+  - Unit Tests: 100 tests (98% pass rate)
+  - API Tests: 38 tests (0% pass rate - requires database)
+  - Integration Tests: 16 tests (0% pass rate - requires database)
 
 ## Test Structure
 
-### 1. Unit Tests (tests/unit/)
+### 1. Unit Tests (tests/unit/) - 100 tests total
 
-#### Repository Layer Tests
+#### Repository Layer Tests - 64 tests
 
-- **tenant_repository_tests.rs**: 22 tests
+- **tenant_repository_tests.rs**: 18 tests
   - CRUD operations
   - Member management
   - Quota checking
   - Error handling
   
-- **monitor_repository_tests.rs**: 18 tests
+- **monitor_repository_tests.rs**: 15 tests
   - Monitor lifecycle
   - Pagination
   - Quota enforcement
   
-- **network_repository_tests.rs**: 16 tests
+- **network_repository_tests.rs**: 15 tests (1 failing)
   - Network management
   - Relationship constraints
+  - ❌ `test_get_network_by_id_not_found` - assertion error
   
-- **trigger_repository_tests.rs**: 17 tests
+- **trigger_repository_tests.rs**: 16 tests (1 failing)
   - Trigger operations
   - Multiple trigger types
+  - ❌ `test_get_trigger_by_id_not_found` - assertion error
 
-#### Service Layer Tests  
+#### Service Layer Tests - 36 tests
 
-- **monitor_service.rs**: 10 tests
+- **monitor_service.rs**: 9 tests
   - Business logic validation
   - Quota enforcement
   - Access control
   
-- **network_service.rs**: 10 tests
+- **network_service.rs**: 9 tests
   - Network lifecycle
   - Validation rules
   
-- **trigger_service.rs**: 12 tests
+- **trigger_service.rs**: 10 tests
   - Trigger management
   - Type validation
   
-- **audit_service.rs**: 9 tests
+- **audit_service.rs**: 8 tests
   - Audit logging
   - Different action types
 
-### 2. API Tests (tests/api/)
+### 2. API Tests (tests/api/) - 38 tests total (all require DATABASE_URL)
 
 - **tenant_api_tests.rs**: 9 tests
   - REST endpoints
   - Request validation
   - Error responses
   
-- **monitor_api_tests.rs**: 10 tests
+- **monitor_api_tests.rs**: 9 tests
   - Authentication
   - Authorization
   - Multi-tenant isolation
@@ -76,7 +90,7 @@ This document summarizes the comprehensive test suite implementation for the Ste
   - Trigger types
   - Quota limits
 
-### 3. Integration Tests (tests/integration/)
+### 3. Integration Tests (tests/integration/) - 16 tests total (all require DATABASE_URL)
 
 - **end_to_end_tests.rs**: 3 tests
   - Complete workflows
@@ -89,11 +103,15 @@ This document summarizes the comprehensive test suite implementation for the Ste
   - Trigger quotas
   - Storage tracking
   
-- **multi_tenant_isolation_tests.rs**: 5 tests
+- **multi_tenant_isolation_tests.rs**: 4 tests
   - Resource isolation
   - Member access control
   - Concurrent operations
   - Cascade deletions
+
+- **Additional Integration Tests**: 4 tests
+  - API integration tests
+  - Tenant isolation verification
 
 ## Test Infrastructure
 
@@ -199,24 +217,83 @@ async fn test_api_endpoint(pool: PgPool) {
 - ✅ Member role enforcement
 - ✅ Audit trail
 
-## Next Steps
+## Analysis of Failing Tests
 
-1. **Run Coverage Report**:
+### API Tests (35 failures)
+
+Most API tests are failing with 404 errors, indicating routing or middleware configuration issues:
+
+- All endpoints return 404 instead of expected status codes
+- Authentication middleware may not be properly configured
+- Tenant context is not being set correctly in test environment
+
+### Integration Tests (8 failures)
+
+Integration tests fail primarily due to:
+
+- `No tenant context set: AccessError` - tenant context middleware not working
+- Database constraint violations (foreign key issues)
+- Missing test data setup
+
+### Unit Tests (2 failures)
+
+Minor assertion errors in error message formatting:
+
+- `network_repository_tests::test_get_network_by_id_not_found`: expects "network" but gets "resource"
+- `trigger_repository_tests::test_get_trigger_by_id_not_found`: expects "trigger" but gets "resource"
+
+## Environment Setup Required
+
+To run the complete test suite with all tests passing:
+
+1. **Database Configuration**:
 
    ```bash
-   cargo tarpaulin --out Html --output-dir coverage
+   # Set DATABASE_URL for API and integration tests
+   export DATABASE_URL=postgres://username@localhost:5432/stellar_monitor_tenant
    ```
 
-2. **Performance Tests**:
+2. **SQLx Offline Mode**:
+
+   ```bash
+   # Prepare SQLx queries for offline compilation
+   cargo sqlx prepare
+   
+   # Or run tests with offline mode
+   export SQLX_OFFLINE=true
+   ```
+
+3. **Known Issues**:
+   - 2 unit tests have assertion errors (error message format)
+   - All API/integration tests require PostgreSQL database
+   - Pre-push hooks may fail without database configuration
+
+## Next Steps
+
+1. **Fix Failing Unit Tests**:
+   - Update error assertions in `network_repository_tests.rs`
+   - Update error assertions in `trigger_repository_tests.rs`
+
+2. **Run Coverage Report**:
+
+   ```bash
+   # Install coverage tool
+   cargo install cargo-llvm-cov
+   
+   # Run with database
+   DATABASE_URL=postgres://... cargo llvm-cov --html
+   ```
+
+3. **Performance Tests**:
    - Load testing with many tenants
    - Concurrent operation stress tests
    - Database query optimization
 
-3. **Property-Based Tests**:
+4. **Property-Based Tests**:
    - Add proptest for edge cases
    - Fuzz testing for security
 
-4. **Contract Tests**:
+5. **Contract Tests**:
    - API contract validation
    - OpenZeppelin Monitor integration
 
@@ -224,9 +301,18 @@ async fn test_api_endpoint(pool: PgPool) {
 
 The test suite now provides comprehensive coverage across all layers of the application:
 
-- Repository layer with mocked database operations
-- Service layer with business logic validation
-- API layer with full HTTP testing
-- Integration tests verifying end-to-end workflows
+- **Repository layer**: 64 tests with mocked database operations (96.9% passing)
+- **Service layer**: 36 tests with business logic validation (100% passing)
+- **API layer**: 38 tests with full HTTP testing (requires database)
+- **Integration tests**: 16 tests verifying end-to-end workflows (requires database)
 
-This brings us from 13.42% coverage to an estimated ~95%+ coverage, matching the OpenZeppelin Monitor standard of quality.
+### Coverage Summary
+
+- **Without Database**: 68.8% tests passing (106/154)
+- **With Database**: 70.8% tests passing (109/154)
+- **Remaining Issues**:
+  - 35 API tests failing (routing/middleware issues)
+  - 8 integration tests failing (tenant context issues)
+  - 2 unit tests with assertion errors
+
+The implementation follows OpenZeppelin Monitor patterns with comprehensive mocking, test builders, and fixture-based testing. However, significant work remains to fix the API layer tests and integration tests.
