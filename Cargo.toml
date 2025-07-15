@@ -1,0 +1,88 @@
+[package]
+name = "stellar-monitor-tenant-isolation"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+authors = ["Blip0 Team"]
+description = "Multi-tenant isolation layer for OpenZeppelin Monitor"
+license = "MIT"
+repository = "https://github.com/blip0/stellar-monitor-tenant-isolation"
+
+[profile.release]
+opt-level = 0
+overflow-checks = false
+panic = 'abort'
+
+[profile.test]
+debug = true
+opt-level = 0
+overflow-checks = true
+panic = 'unwind'
+
+[dependencies]
+# Core dependencies
+actix-rt = "2.0.0"
+actix-web = "4"
+anyhow = { version = "1.0.97", features = ["std"] }
+async-trait = "0.1"
+chrono = { version = "0.4", features = ["serde"] }
+config = { version = "0.14", features = ["toml"] }
+dotenvy = "0.15.7"
+futures = "0.3"
+lazy_static = "1.5"
+log = "0.4"
+prometheus = "0.14"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0.12"
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1.41"
+tracing-appender = "0.2"
+tracing-core = "0.1.33"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+uuid = { version = "1.15.0", features = ["v4", "serde"] }
+
+# Database dependencies
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "sqlite", "migrate", "macros", "chrono", "uuid", "bigdecimal", "ipnetwork"] }
+email_address = "0.2"
+axum-extra = { version = "0.9", features = ["typed-header"] }
+num-traits = "0.2"
+
+# Authentication & Security
+jsonwebtoken = "9.3"
+argon2 = "0.5"
+rand = "0.8"
+base64 = "0.22"
+
+# API dependencies  
+axum = { version = "0.7", features = ["ws", "macros"] }
+tower = { version = "0.5", features = ["full"] }
+tower-http = { version = "0.6", features = ["cors", "trace", "limit"] }
+bigdecimal = "0.4.8"
+
+# OpenZeppelin Monitor as dependency
+# For now we'll reference it locally, but this would be a git/crates.io dependency
+# openzeppelin-monitor = { path = "../openzeppelin-monitor" }
+
+[dev-dependencies]
+cargo-llvm-cov = "0.6"
+mockall = "0.13.1"
+mockito = "1.6.1"
+once_cell = "1.20.0"
+proptest = "1.6.0"
+tempfile = "3.2"
+tracing-test = "0.2.5"
+test-case = "3.3"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "stellar-monitor-tenant"
+
+[features]
+default = ["postgres"]
+postgres = []
+sqlite = []
+test-ci-only = []
