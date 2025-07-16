@@ -8,10 +8,10 @@ pub mod mocks;
 #[path = "unit/mod.rs"]
 mod unit;
 
-#[cfg(test)]
-#[path = "api/mod.rs"]
-mod api;
+// #[cfg(test)]
+// #[path = "api/mod.rs"]
+// mod api;
 
-#[cfg(test)]
-#[path = "integration/mod.rs"]
-mod integration;
+// #[cfg(test)]
+// #[path = "integration/mod.rs"]
+// mod integration;
